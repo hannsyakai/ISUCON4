@@ -88,7 +88,7 @@ module Isucon4
         g = db.prepare('SELECT * FROM logs WHERE advertiser=?').execute(
           id.split('/').last
         ).map do |x|
-          x[:gender] = x[:sex] == 0 ? :female : :male
+          x[:gender] = x[:sex] == 0 ? :female : (x[:sex] == 1 ? :male : :unknown)
           x[:ad_id] = x[:ad_id].to_s
           x
         end.group_by { |click| click[:ad_id] }
@@ -190,7 +190,7 @@ module Isucon4
 
           breakdown[:gender] = log.group_by{ |_| _[:gender] }.map{ |k,v| [k,v.size] }.to_h
           breakdown[:agents] = log.group_by{ |_| _[:agent] }.map{ |k,v| [k,v.size] }.to_h
-          breakdown[:generations] = log.group_by{ |_| _[:age] ? _[:age].to_i / 10 : :unknown }.map{ |k,v| [k,v.size] }.to_h
+          breakdown[:generations] = log.group_by{ |_| (_[:age] && _[:age].to_i >= 0) ? _[:age].to_i / 10 : :unknown }.map{ |k,v| [k,v.size] }.to_h
         end
       end.to_json
     end
