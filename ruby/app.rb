@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'mysql2'
 require 'pathname'
 require 'digest/sha2'
 require 'redis'
@@ -15,6 +16,34 @@ module Isucon4
     LOG_DIR.mkpath unless LOG_DIR.exist?
 
     helpers do
+      def config
+        @config ||= {
+          db: {
+            host: '52.192.211.180',
+            port: 3306,
+            username: 'root',
+            password: 'weitarou',
+            database: 'isucon',
+          },
+        }
+      end
+
+      def db
+        return Thread.current[:isucon_db] if Thread.current[:isucon_db]
+        client = Mysql2::Client.new(
+          host: config[:db][:host],
+          port: config[:db][:port],
+          username: config[:db][:username],
+          password: config[:db][:password],
+          database: config[:db][:database],
+          encoding: 'utf8',
+          reconnect: true,
+        )
+        client.query_options.merge!(symbolize_keys: true, database_timezone: :local, application_timezone: :local)
+        Thread.current[:isucon_db] = client
+        client
+      end
+
       def advertiser_id
         request.env['HTTP_X_ADVERTISER_ID']
       end
