@@ -67,7 +67,7 @@ module Isucon4
       end
 
       def next_ad_id
-        redis.incr('isu4:ad-next').to_i
+        SecureRandom.uuid.hex
       end
 
       def get_log(id)
