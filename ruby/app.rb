@@ -11,10 +11,6 @@ require 'rack-lineprof'
 module Isucon4
   class App < Sinatra::Base
     use Rack::Lineprof
-    ADS_DIR = Pathname.new(__dir__).join('ads')
-    LOG_DIR = Pathname.new(__dir__).join('logs')
-    ADS_DIR.mkpath unless ADS_DIR.exist?
-    LOG_DIR.mkpath unless LOG_DIR.exist?
     Redis.current = Redis.new(host: '52.193.220.196')
 
     helpers do
@@ -74,23 +70,6 @@ module Isucon4
         redis.incr('isu4:ad-next').to_i
       end
 
-      def next_ad(slot)
-        key = slot_key(slot)
-
-        id = redis.rpoplpush(key, key)
-        unless id
-          return nil
-        end
-
-        ad = get_ad(slot, id)
-        if ad
-          ad
-        else
-          redis.lrem(key, 0, id)
-          next_ad(slot)
-        end
-      end
-
       def get_ad(slot, id)
         key = ad_key(slot, id)
         ad = redis.hgetall(key)
@@ -147,7 +126,6 @@ module Isucon4
           f.puts asset.read
         end
       end
-      #redis.set(asset_key(slot,id), asset.read)
       redis.rpush(slot_key(slot), id)
       redis.sadd(advertiser_key(advertiser_id), key)
 
