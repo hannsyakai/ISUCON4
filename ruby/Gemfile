@@ -4,6 +4,7 @@ gem 'sinatra'
 gem 'unicorn'
 gem 'foreman'
 gem 'redis'
+gem 'hiredis'
 gem 'mysql2'
 gem 'net-sftp'
 gem 'rack-lineprof', group: :development
