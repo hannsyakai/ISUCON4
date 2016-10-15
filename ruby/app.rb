@@ -10,7 +10,7 @@ require 'rack-lineprof'
 
 module Isucon4
   class App < Sinatra::Base
-    use Rack::Lineprof
+    use Rack::Lineprof, profile: 'app.rb'
     Redis.current = Redis.new(host: '52.193.220.196')
 
     helpers do
