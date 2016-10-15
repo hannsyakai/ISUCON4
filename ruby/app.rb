@@ -214,7 +214,7 @@ module Isucon4
         redis.del(*keys)
       end
 
-      LOG_DIR.children.each(&:delete)
+      db.prepare('DELETE FROM logs').execute
 
       content_type 'text/plain'
       "OK"
