@@ -100,7 +100,6 @@ module Isucon4
     end
 
     post '/slots/:slot/ads' do
-      puts 'POST /slots/:slot/ads'
       unless advertiser_id
         halt 400
       end
@@ -130,10 +129,6 @@ module Isucon4
       Net::SFTP.start(ip, 'root', :password => 'weitarou') do |sftp|
         sftp.upload!(filename, filename)
       end
-        #sftp.file.open("/store/#{id}", "w") do |f|
-          #f.puts 'a'
-        #  f.puts asset.read
-        #end
       redis.rpush(slot_key(slot), id)
       redis.sadd(advertiser_key(advertiser_id), key)
 
