@@ -200,7 +200,7 @@ module Isucon4
         redis.del(*keys)
       end
 
-      db.prepare('DELETE FROM logs').execute
+      db.prepare('TRUNCATE TABLE logs').execute
       Pathname.new('/store').children.each(&:delete)
 
       content_type 'text/plain'
