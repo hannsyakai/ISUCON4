@@ -10,7 +10,7 @@ require 'rack-lineprof'
 
 module Isucon4
   class App < Sinatra::Base
-    use Rack::Lineprof, profile: 'app.rb'
+    #use Rack::Lineprof, profile: 'app.rb'
     Redis.current = Redis.new(host: '52.193.220.196')
 
     helpers do
@@ -100,11 +100,13 @@ module Isucon4
     end
 
     post '/slots/:slot/ads' do
+      puts 'POST /slots/:slot/ads'
       unless advertiser_id
         halt 400
       end
 
       slot = params[:slot]
+      params[:asset] ||= {}
       asset = params[:asset][:tempfile]
 
       id = next_ad_id
@@ -121,11 +123,17 @@ module Isucon4
         'impressions', 0,
       )
       ip = ['52.193.220.196', '52.192.211.180'][id % 2]
-      Net::SFTP.start(ip, 'root', :password => 'weitarou') do |sftp|
-        sftp.file.open("/store/#{id}", "w") do |f|
-          f.puts asset.read
-        end
+      filename = "/store/#{id}"
+      File.open(filename, "wb") do |f|
+        f.write asset.read
       end
+      Net::SFTP.start(ip, 'root', :password => 'weitarou') do |sftp|
+        sftp.upload!(filename, filename)
+      end
+        #sftp.file.open("/store/#{id}", "w") do |f|
+          #f.puts 'a'
+        #  f.puts asset.read
+        #end
       redis.rpush(slot_key(slot), id)
       redis.sadd(advertiser_key(advertiser_id), key)
 
@@ -193,6 +201,7 @@ module Isucon4
       end
 
       db.prepare('DELETE FROM logs').execute
+      Pathname.new('/store').children.each(&:delete)
 
       content_type 'text/plain'
       "OK"
