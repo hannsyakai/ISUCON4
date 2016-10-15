@@ -3,12 +3,13 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"math/rand"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"os/signal"
 	"regexp"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"syscall"
@@ -16,6 +17,7 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/go-redis/redis"
 	"github.com/martini-contrib/render"
+	"github.com/pkg/profile"
 )
 
 type Ad struct {
@@ -546,6 +548,7 @@ func routePostInitialize() (int, string) {
 
 func main() {
 	m := martini.Classic()
+	defer profile.Start(profile.CPUProfile).Stop()
 
 	m.Use(martini.Static("../public"))
 	m.Use(render.Renderer(render.Options{
@@ -565,5 +568,21 @@ func main() {
 		m.Get("/final_report", routeGetFinalReport)
 	})
 	m.Post("/initialize", routePostInitialize)
+	shutdown()
 	http.ListenAndServe(":8080", m)
+}
+
+func shutdown() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		for {
+			s := <-c
+			switch s {
+			case syscall.SIGTERM:
+				pprof.StopCPUProfile()
+
+			}
+		}
+	}()
 }
