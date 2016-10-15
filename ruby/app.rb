@@ -7,6 +7,7 @@ require 'rack/request'
 
 module Isucon4
   class App < Sinatra::Base
+    use Rack::Lineprof
     ADS_DIR = Pathname.new(__dir__).join('ads')
     LOG_DIR = Pathname.new(__dir__).join('logs')
     ADS_DIR.mkpath unless ADS_DIR.exist?

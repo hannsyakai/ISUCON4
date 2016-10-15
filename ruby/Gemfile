@@ -4,3 +4,4 @@ gem 'sinatra'
 gem 'unicorn'
 gem 'foreman'
 gem 'redis'
+gem 'rack-lineprof', group: :development
