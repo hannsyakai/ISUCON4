@@ -4,6 +4,7 @@ require 'pathname'
 require 'digest/sha2'
 require 'redis'
 require 'json'
+require 'net/sftp'
 require 'rack/request'
 require 'rack-lineprof'
 
