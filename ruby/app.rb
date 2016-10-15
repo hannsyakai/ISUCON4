@@ -7,7 +7,6 @@ require 'rack/request'
 
 module Isucon4
   class App < Sinatra::Base
-    set :public_folder, "#{__dir__}/../public"
     ADS_DIR = Pathname.new(__dir__).join('ads')
     LOG_DIR = Pathname.new(__dir__).join('logs')
     ADS_DIR.mkpath unless ADS_DIR.exist?
@@ -94,7 +93,7 @@ module Isucon4
     end
 
     get '/' do
-      Pathname.new(self.class.public_folder).join('index.html').read
+      'app'
     end
 
     post '/slots/:slot/ads' do
