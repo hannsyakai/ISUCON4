@@ -15,6 +15,7 @@ module Isucon4
     LOG_DIR = Pathname.new(__dir__).join('logs')
     ADS_DIR.mkpath unless ADS_DIR.exist?
     LOG_DIR.mkpath unless LOG_DIR.exist?
+    Redis.current = Redis.new(host: '52.193.220.196')
 
     helpers do
       def config
@@ -171,6 +172,7 @@ module Isucon4
         end
 
         get_log(advertiser_id).each do |ad_id, clicks|
+          next unless report.include?(ad_id)
           report[ad_id][:clicks] = clicks.size
         end
       end.to_json
