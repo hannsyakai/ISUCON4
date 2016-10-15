@@ -4,4 +4,5 @@ gem 'sinatra'
 gem 'unicorn'
 gem 'foreman'
 gem 'redis'
+gem 'mysql2'
 gem 'rack-lineprof', group: :development

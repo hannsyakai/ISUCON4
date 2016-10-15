@@ -4,6 +4,7 @@ require 'digest/sha2'
 require 'redis'
 require 'json'
 require 'rack/request'
+require 'rack-lineprof'
 
 module Isucon4
   class App < Sinatra::Base
