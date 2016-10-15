@@ -140,7 +140,13 @@ module Isucon4
         'destination', params[:destination],
         'impressions', 0,
       )
-      redis.set(asset_key(slot,id), asset.read)
+      ip = ['52.193.220.196', '52.192.211.180'][id % 2]
+      Net::SFTP.start(ip, 'root', :password => 'weitarou') do |sftp|
+        sftp.file.open("/store/#{id}", "w") do |f|
+          f.puts asset.read
+        end
+      end
+      #redis.set(asset_key(slot,id), asset.read)
       redis.rpush(slot_key(slot), id)
       redis.sadd(advertiser_key(advertiser_id), key)
 
