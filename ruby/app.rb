@@ -103,23 +103,14 @@ module Isucon4
         ad
       end
 
-      def decode_user_key(id)
-        return {gender: :unknown, age: nil} if !id || id.empty?
-        gender, age = id.split('/', 2).map(&:to_i)
-        {gender: gender == 0 ? :female : :male, age: age}
-      end
-
       def get_log(id)
-        path = LOG_DIR.join(id.split('/').last)
-        return {} unless path.exist?
-
-        open(path, 'r') do |io|
-          io.flock File::LOCK_SH
-          io.read.each_line.map do |line|
-            ad_id, user, agent = line.chomp.split(?\t,3)
-            {ad_id: ad_id, user: user, agent: agent && !agent.empty? ? agent : :unknown}.merge(decode_user_key(user))
-          end.group_by { |click| click[:ad_id] }
-        end
+        g = db.prepare('SELECT * FROM logs WHERE advertiser=?').execute(
+          id.split('/').last
+        ).map do |x|
+          x[:gender] = x[:sex] == 0 ? :female : :male
+          x[:ad_id] = x[:ad_id].to_s
+          x
+        end.group_by { |click| click[:ad_id] }
       end
     end
 
