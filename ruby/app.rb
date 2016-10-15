@@ -122,14 +122,10 @@ module Isucon4
         'impressions', 0,
         'hosted_by', 1,
       )
-      ip = ['52.193.220.196', '52.192.211.180'][id % 2]
       filename = "/store/#{id}"
       File.open(filename, "wb") do |f|
         f.write asset.read
       end
-      #Net::SFTP.start(ip, 'root', :password => 'weitarou') do |sftp|
-      #  sftp.upload!(filename, filename)
-      #end
       redis.rpush(slot_key(slot), id)
       redis.sadd(advertiser_key(advertiser_id), key)
 
