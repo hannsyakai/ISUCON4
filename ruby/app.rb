@@ -85,7 +85,7 @@ module Isucon4
       end
 
       def get_log(id)
-        g = db.prepare('SELECT * FROM logs WHERE advertiser=?').execute(
+        g = db.prepare('SELECT ad_id, sex, age, agent FROM logs WHERE advertiser=?').execute(
           id.split('/').last
         ).map do |x|
           x[:gender] = x[:sex] == 0 ? :female : (x[:sex] == 1 ? :male : :unknown)
