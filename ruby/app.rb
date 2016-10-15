@@ -70,20 +70,6 @@ module Isucon4
         redis.incr('isu4:ad-next').to_i
       end
 
-      def get_ad(slot, id)
-        key = ad_key(slot, id)
-        ad = redis.hgetall(key)
-
-        return nil if !ad || ad.empty?
-        ad['impressions'] = ad['impressions'].to_i
-        ad['asset'] = url("/slots/#{slot}/ads/#{id}/asset")
-        ad['counter'] = url("/slots/#{slot}/ads/#{id}/count")
-        ad['redirect'] = url("/slots/#{slot}/ads/#{id}/redirect")
-        ad['type'] = nil if ad['type'] == ""
-
-        ad
-      end
-
       def get_log(id)
         g = db.prepare('SELECT ad_id, sex, age, agent FROM logs WHERE advertiser=?').execute(
           id.split('/').last
@@ -110,13 +96,14 @@ module Isucon4
 
       id = next_ad_id
       key = ad_key(slot, id)
+      type = params[:type] || params[:asset][:type] || 'video/mp4'
 
       redis.hmset(
         key,
         'slot', slot,
         'id', id,
         'title', params[:title],
-        'type', params[:type] || params[:asset][:type] || 'video/mp4',
+        'type', type,
         'advertiser', advertiser_id,
         'destination', params[:destination],
         'impressions', 0,
@@ -130,7 +117,18 @@ module Isucon4
       redis.sadd(advertiser_key(advertiser_id), key)
 
       content_type :json
-      get_ad(slot, id).to_json
+      {}.tap do |ad|
+        ad['slot'] = slot
+        ad['id'] = id.to_s
+        ad['title'] = params[:title]
+        ad['type'] = type == '' ? nil : type
+        ad['advertiser'] = advertiser_id
+        ad['destination'] = params[:destination]
+        ad['impressions'] = 0
+        ad['asset'] = url("/slots/#{slot}/ads/#{id}/asset")
+        ad['counter'] = url("/slots/#{slot}/ads/#{id}/count")
+        ad['redirect'] = url("/slots/#{slot}/ads/#{id}/redirect")
+      end.to_json
     end
 
     get '/me/report' do
