@@ -67,7 +67,7 @@ module Isucon4
       end
 
       def next_ad_id
-        SecureRandom.uuid.hex
+        SecureRandom.uuid.hex & 0x7fffffff
       end
 
       def get_log(id)
